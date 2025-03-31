@@ -35,7 +35,7 @@ const createCheckoutSession = async (req, res) => {
     res.json({ sessionId: session.id });
   } catch (error) {
     console.error('Error creating checkout session:', error);
-    res.status(500).json({ error: 'Internal Server Error' });
+    res.status(500).json({ error: 'Internal Server Error', bookingId });
   }
 };
 
