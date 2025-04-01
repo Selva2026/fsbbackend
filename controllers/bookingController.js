@@ -107,7 +107,12 @@ const updateBookingStatus = async (req, res) => {
             
             await flight.save();
             await booking.save();
+
+            setTimeout(async () => {
+                await sendBookingCancellationEmail(user, flight, booking);
+            }, 2000); 
         }
+
 
         return res.status(200).json({ message: "Booking status updated successfully", booking });
     } catch (err) {
@@ -123,7 +128,7 @@ const sendBookingConfirmationEmail = async (user, flight, booking) => {
             service: "gmail",
             auth: {
                 user: process.env.EMAIL,
-                pass: process.env.EMAIL_PASS,
+                pass: process.env.EMAIL_PASS
             },
         });
 
@@ -148,8 +153,51 @@ const sendBookingConfirmationEmail = async (user, flight, booking) => {
                 Thank you for choosing our airline. Have a safe journey!
 
                 Best regards,
-                Skypiea Airlines Team
-            `,
+                SkyRadar Airlines Team
+            `
+        };
+
+        await transporter.sendMail(mailOptions);
+    } catch (error) {
+        console.error("Error sending email:", error);
+    }
+};
+
+
+const sendBookingCancellationEmail = async (user, flight, booking) => {
+    try {
+        const userName = user.username || user.email;
+        const transporter = nodemailer.createTransport({
+            service: "gmail",
+            auth: {
+                user: process.env.EMAIL,
+                pass: process.env.EMAIL_PASS
+            },
+        });
+
+        const mailOptions = {
+            from: process.env.EMAIL,
+            to: user.email,
+            subject: "Your Flight Booking Cancellation",
+            text: `
+                Dear ${userName},
+
+                Your flight booking has been cancelled Successfully! Here are your flight details:
+
+                Flight Number: ${flight.flightNumber}
+                Airline: ${flight.airline}
+                Departure: ${flight.departure}
+                Destination: ${flight.destination}
+                Date: ${new Date(flight.departureTime).toLocaleDateString()}
+                Departure Time: ${new Date(flight.departureTime).toLocaleTimeString()}
+                
+                
+
+                Thank you for choosing our airline. Please Visit Again!
+
+                Best regards,
+                SkyRadar Airlines Team
+            `
         };
 
         await transporter.sendMail(mailOptions);
