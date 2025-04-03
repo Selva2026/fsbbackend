@@ -38,8 +38,8 @@ const createCheckoutSession = async (req, res) => {
         },
       ],
       mode: 'payment',
-      success_url: `http://localhost:5173/payment-success?${queryParams}`,
-      cancel_url: `http://localhost:5173/payment`,
+      success_url: `https://fsbskyradar.netlify.app/payment-success?${queryParams}`,
+      cancel_url: `https://fsbskyradar.netlify.app/payment`,
     });
 
     res.json({ sessionId: session.id });
