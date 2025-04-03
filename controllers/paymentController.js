@@ -1,7 +1,6 @@
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const Booking = require('../models/Booking');
 
-
 const createCheckoutSession = async (req, res) => {
   const { bookingId } = req.body;
 
@@ -13,6 +12,17 @@ const createCheckoutSession = async (req, res) => {
 
     const priceInCents = Math.round(booking.totalPrice * 100);
 
+    // Construct query params for success URL
+    const queryParams = new URLSearchParams({
+      bookingId: booking._id.toString(),
+      status: 'confirmed',
+      flightName: booking.flightId.name,  // Example: Flight name
+      departure: booking.flightId.departure,  // Example: Departure location
+      arrival: booking.flightId.arrival,  // Example: Arrival location
+      date: booking.flightId.date,  // Example: Flight date
+      price: booking.totalPrice.toString(), // Example: Booking price
+    }).toString();
+
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       line_items: [
@@ -22,20 +32,20 @@ const createCheckoutSession = async (req, res) => {
             product_data: {
               name: `Booking ID: ${bookingId}`,
             },
-            unit_amount: priceInCents, 
+            unit_amount: priceInCents,
           },
           quantity: 1,
         },
       ],
       mode: 'payment',
-      success_url: `${process.env.CLIENT_URL}/payment-success?bookingId=${bookingId}`,
-      cancel_url: `${process.env.CLIENT_URL}/payment`,
+      success_url: `http://localhost:5173/payment-success?${queryParams}`,
+      cancel_url: `http://localhost:5173/payment`,
     });
 
     res.json({ sessionId: session.id });
   } catch (error) {
     console.error('Error creating checkout session:', error);
-    res.status(500).json({ error: 'Internal Server Error'});
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 };
 
