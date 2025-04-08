@@ -32,10 +32,10 @@ const forgotPassword = async (req, res) => {
         
                 We received a request to reset your password. Click the link below to reset it:
         
-                Reset Link: http://localhost:5173/reset-password/${user._id}/${resetToken}
+                Reset Link: https://fsbskyradar.netlify.app/reset-password/${user._id}/${resetToken}
 
                 Best regards,  
-                Skypiea Airlines Team
+               SKYRADAR
             `,
         };
         
